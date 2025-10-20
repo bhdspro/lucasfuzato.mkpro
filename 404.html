@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método GBA - Lucas Fuzato</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+        
+        body {
+            margin: 0;
+            background-color: #000000;
+            font-family: 'Montserrat', sans-serif;
+            color: #ffffff;
+            padding-top: 85px;
+            box-sizing: border-box;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            margin: 0 auto;
+            padding: 0 15px 30px;
+        }
+        
+        .header-text {
+            background-color: #61b972;
+            padding: 15px 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .header-text h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.4;
+            color: #000000;
+        }
+        
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.2);
+            margin: 20px 0;
+        }
+
+        .player-container {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            max-height: 85vh;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+            background: #000;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .player-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white; cursor: pointer; z-index: 10;
+            transition: opacity 0.3s ease;
+        }
+        .player-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #autoplay-prompt h2 {
+            margin: 0; font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        #autoplay-prompt p {
+            font-size: 18px; margin-top: 10px;
+        }
+
+        #autoplay-prompt .prompt-box {
+            background-color: rgba(220, 38, 38, 0.85);
+            padding: 20px 25px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            max-width: 90%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        #resume-prompt button {
+            background-color: #04df53; color: white; border: none; padding: 12px 24px;
+            margin: 10px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;
+        }
+        #resume-prompt button.secondary { background-color: #555; }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #FFFFFF;
+            background-color: #04df53;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(4, 223, 83, 0.5);
+            animation: pulse 1.5s infinite;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        #in-video-cta-button {
+            position: absolute; bottom: 80px; left: 50%;
+            transform: translateX(-50%); z-index: 20; display: none;
+        }
+        
+        .footer-cta {
+            margin-top: 30px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+        .footer-cta p {
+            font-size: 19px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            color: #04df53;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .progress-bar-container {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 15px;
+            background-color: rgba(255, 255, 255, 0.2); z-index: 20;
+        }
+        #progress-bar {
+            width: 0; height: 100%; background-color: #5AA738;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-text">
+        <h1>VEJA ESSE VÍDEO PARA ENTENDER SUA JORNADA COMIGO</h1>
+    </div>
+    
+    <div class="main-container">
+        <div class="divider"></div>
+
+        <div class="player-container">
+            <video id="vsl-video" src="https://lucasfuzato.mkpro.online/video.mp4" playsinline autoplay muted loop disableRemotePlayback></video>
+
+            <div id="autoplay-prompt" class="player-overlay">
+                <div class="prompt-box">
+                    <h2>Seu vídeo já começou</h2>
+                    <p>Clique para ouvir</p>
+                </div>
+            </div>
+            
+            <div id="resume-prompt" class="player-overlay hidden">
+                <h2>Você já começou a assistir</h2>
+                <p>Deseja continuar de onde parou?</p>
+                <div>
+                    <button id="resume-yes">Continuar Assistindo</button>
+                    <button id="resume-no" class="secondary">Assistir do Início</button>
+                </div>
+            </div>
+
+            <a href="https://lucasfuzato.mkpro.online/super-desconto" target="_blank">
+                <button id="in-video-cta-button" class="cta-button">COMPRAR AGORA</button>
+            </a>
+
+            <div class="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+        
+        <div class="footer-cta">
+            <p>Dê agora o seu Primeiro Passo e entre pra turma black agora!<br>
+            Por apenas <strong>12x de R$ 24,70</strong> – ou R$ 247,00 à vista</p>
+            <a href="https://lucasfuzato.mkpro.online/super-desconto" target="_blank" class="cta-button">COMPRAR AGORA</a>
+        </div>
+    </div>
+
+    <script>
+        const CTA_START_TIME = 190;
+        const CTA_END_TIME = 283;
+        const LOCAL_STORAGE_KEY = 'vslVideoTime_Fuzato';
+
+        const video = document.getElementById('vsl-video');
+        const autoplayPrompt = document.getElementById('autoplay-prompt');
+        const resumePrompt = document.getElementById('resume-prompt');
+        const inVideoCtaButton = document.getElementById('in-video-cta-button');
+        const progressBar = document.getElementById('progress-bar');
+        const footerCta = document.querySelector('.footer-cta');
+        
+        function startVideoWithSound() {
+            video.muted = false;
+            video.loop = false;
+            video.play();
+            autoplayPrompt.classList.add('hidden');
+        }
+
+        autoplayPrompt.addEventListener('click', () => {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            video.currentTime = 0;
+            video.muted = false;
+            video.loop = false;
+            video.play();
+            autoplayPrompt.classList.add('hidden');
+        });
+        
+        window.addEventListener('load', () => {
+            const savedTime = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedTime && parseFloat(savedTime) > 5) { 
+                resumePrompt.classList.remove('hidden');
+                autoplayPrompt.classList.add('hidden');
+            }
+            
+            setTimeout(() => {
+                if (footerCta) {
+                    footerCta.style.display = 'block';
+                    setTimeout(() => {
+                        footerCta.style.opacity = '1';
+                    }, 50);
+                }
+            }, 20000);
+        });
+
+        document.getElementById('resume-yes').addEventListener('click', () => {
+            const savedTime = localStorage.getItem(LOCAL_STORAGE_KEY);
+            video.currentTime = parseFloat(savedTime);
+            startVideoWithSound();
+            resumePrompt.classList.add('hidden');
+        });
+
+        document.getElementById('resume-no').addEventListener('click', () => {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            video.currentTime = 0; // Adicionado para reiniciar o vídeo
+            startVideoWithSound();
+            resumePrompt.classList.add('hidden');
+        });
+
+        video.addEventListener('timeupdate', () => {
+            const currentTime = video.currentTime;
+
+            if (currentTime >= CTA_START_TIME && currentTime <= CTA_END_TIME) {
+                inVideoCtaButton.style.display = 'block';
+            } else {
+                inVideoCtaButton.style.display = 'none';
+            }
+            
+            localStorage.setItem(LOCAL_STORAGE_KEY, currentTime);
+            
+            const progressPercent = (video.duration) ? (currentTime / video.duration) * 100 : 0;
+            progressBar.style.width = `${progressPercent}%`;
+        });
+        
+        video.play().catch(error => {
+            console.log("Navegador bloqueou autoplay. Aguardando interação.");
+        });
+    </script>
+</body>
+</html>
+
+
