@@ -11,13 +11,9 @@
         body {
             margin: 0;
             background-color: #000000; /* Fundo preto absoluto, como no site original */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             font-family: 'Montserrat', sans-serif;
             color: #ffffff;
-            padding: 30px 15px; /* Espaçamento geral ajustado */
+            padding-top: 85px; /* Adiciona espaço no topo para o cabeçalho fixo */
             box-sizing: border-box;
         }
 
@@ -25,12 +21,21 @@
             width: 100%;
             max-width: 500px; /* Largura ajustada para corresponder ao original */
             text-align: center;
+            margin: 0 auto; /* Centraliza o container principal */
+            padding: 0 15px 30px; /* Mantém o espaçamento lateral e inferior */
         }
         
-        /* Estilo do cabeçalho alterado para corresponder à imagem */
+        /* Estilo do cabeçalho alterado para corresponder à imagem e ficar fixo */
         .header-text {
             background-color: #61b972; /* Tom de verde da imagem */
             padding: 15px 10px;
+            position: fixed; /* Gruda o cabeçalho no topo da tela */
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Garante que fique sobre outros elementos */
+            box-sizing: border-box;
+            text-align: center;
         }
 
         .header-text h1 {
@@ -153,12 +158,12 @@
 </head>
 <body>
 
+    <!-- Título da Página (agora fixo no topo) -->
+    <div class="header-text">
+        <h1>VEJA ESSE VÍDEO PARA ENTENDER SUA JORNADA COMIGO</h1>
+    </div>
+    
     <div class="main-container">
-        <!-- Título da Página -->
-        <div class="header-text">
-            <h1>VEJA ESSE VÍDEO PARA ENTENDER SUA JORNADA COMIGO</h1>
-        </div>
-        
         <!-- Divisor como no site original -->
         <div class="divider"></div>
 
