@@ -27,11 +27,18 @@
             text-align: center;
         }
         
+        /* Estilo do cabeçalho alterado para corresponder à imagem */
+        .header-text {
+            background-color: #61b972; /* Tom de verde da imagem */
+            padding: 15px 10px;
+        }
+
         .header-text h1 {
             font-size: 26px; /* Tamanho da fonte exato do original */
             font-weight: 700; /* Peso da fonte exato */
-            margin-bottom: 20px;
+            margin: 0; /* Remove margem padrão */
             line-height: 1.4;
+            color: #000000; /* Cor do texto preta */
         }
         
         /* --- Divisor --- */
@@ -130,5 +137,149 @@
         }
 
         @keyframes pulse {
-            0% { transform
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .progress-bar-container {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 15px;
+            background-color: rgba(255, 255, 255, 0.2); z-index: 20;
+        }
+        #progress-bar {
+            width: 0; height: 100%; background-color: #5AA738;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Título da Página -->
+        <div class="header-text">
+            <h1>VEJA ESSE VÍDEO PARA ENTENDER SUA JORNADA COMIGO</h1>
+        </div>
+        
+        <!-- Divisor como no site original -->
+        <div class="divider"></div>
+
+        <!-- Estrutura HTML do Player -->
+        <div class="player-container">
+            <video id="vsl-video" src="https://lucasfuzatto.mkpro.online/video.mp4" playsinline autoplay muted loop disableRemotePlayback></video>
+
+            <div id="autoplay-prompt" class="player-overlay">
+                <div class="prompt-box">
+                    <h2>Seu vídeo já começou</h2>
+                    <p>Clique para ouvir</p>
+                </div>
+            </div>
+            
+            <div id="resume-prompt" class="player-overlay hidden">
+                <h2>Você já começou a assistir</h2>
+                <p>Deseja continuar de onde parou?</p>
+                <div>
+                    <button id="resume-yes">Continuar Assistindo</button>
+                    <button id="resume-no" class="secondary">Assistir do Início</button>
+                </div>
+            </div>
+
+            <a href="https://pay.cakto.com.br/4y96ZM6" target="_blank">
+                <button id="in-video-cta-button" class="cta-button">COMPRAR AGORA</button>
+            </a>
+
+            <div class="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+        
+        <!-- Texto e Botão de Ação (Sempre visíveis) -->
+        <div class="footer-cta">
+            <p>Dê agora o seu Primeiro Passo e entre pra turma black agora!<br>
+            Por apenas <strong>12x de R$ 24,70</strong> – ou R$ 247,00 à vista</p>
+            <a href="https://pay.cakto.com.br/4y96ZM6" target="_blank" class="cta-button">COMPRAR AGORA</a>
+        </div>
+    </div>
+
+    <!-- Script de Funcionalidades do Player -->
+    <script>
+        const CTA_START_TIME = 190;
+        const CTA_END_TIME = 283;
+        const LOCAL_STORAGE_KEY = 'vslVideoTime_Fuzatto';
+
+        const video = document.getElementById('vsl-video');
+        const autoplayPrompt = document.getElementById('autoplay-prompt');
+        const resumePrompt = document.getElementById('resume-prompt');
+        const inVideoCtaButton = document.getElementById('in-video-cta-button');
+        const progressBar = document.getElementById('progress-bar');
+        const footerCta = document.querySelector('.footer-cta');
+        
+        function startVideoWithSound() {
+            video.muted = false;
+            video.loop = false;
+            video.play();
+            autoplayPrompt.classList.add('hidden');
+        }
+
+        // Alterado: Clicar no quadro vermelho agora sempre inicia o vídeo do zero.
+        autoplayPrompt.addEventListener('click', () => {
+            localStorage.removeItem(LOCAL_STORAGE_KEY); // Limpa o progresso salvo
+            video.currentTime = 0; // Garante que o vídeo comece do início
+            video.muted = false;   // Garante que o áudio seja ativado
+            video.loop = false;    // Garante que não entre em loop
+            video.play();          // Inicia a reprodução
+            autoplayPrompt.classList.add('hidden'); // Esconde a mensagem
+        });
+        
+        window.addEventListener('load', () => {
+            const savedTime = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedTime && parseFloat(savedTime) > 5) { 
+                resumePrompt.classList.remove('hidden');
+                autoplayPrompt.classList.add('hidden');
+            }
+            
+            // Lógica para mostrar o CTA do rodapé após 20 segundos
+            setTimeout(() => {
+                if (footerCta) {
+                    footerCta.style.display = 'block';
+                    // Força o navegador a aplicar o display: block antes de mudar a opacidade
+                    setTimeout(() => {
+                        footerCta.style.opacity = '1';
+                    }, 50);
+                }
+            }, 20000); // 20000 milissegundos = 20 segundos
+        });
+
+        document.getElementById('resume-yes').addEventListener('click', () => {
+            const savedTime = localStorage.getItem(LOCAL_STORAGE_KEY);
+            video.currentTime = parseFloat(savedTime);
+            startVideoWithSound();
+            resumePrompt.classList.add('hidden');
+        });
+
+        document.getElementById('resume-no').addEventListener('click', () => {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            startVideoWithSound();
+            resumePrompt.classList.add('hidden');
+        });
+
+        video.addEventListener('timeupdate', () => {
+            const currentTime = video.currentTime;
+
+            if (currentTime >= CTA_START_TIME && currentTime <= CTA_END_TIME) {
+                inVideoCtaButton.style.display = 'block';
+            } else {
+                inVideoCtaButton.style.display = 'none';
+            }
+            
+            localStorage.setItem(LOCAL_STORAGE_KEY, currentTime);
+            
+            const progressPercent = (video.duration) ? (currentTime / video.duration) * 100 : 0;
+            progressBar.style.width = `${progressPercent}%`;
+        });
+        
+        video.play().catch(error => {
+            console.log("Navegador bloqueou autoplay. Aguardando interação.");
+        });
+    </script>
+</body>
+</html>
 
